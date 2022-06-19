@@ -67,12 +67,11 @@ async function setupBullMQProcessor(queueName) {
 }
 
 const run = async () => {
-  const consumer = await setupKafka({ groupId: 'test-kafka', topics: ['property', 'sessioin']})
+  const consumer = await setupKafka({ groupId: 'test-kafka', topics: ['session', 'user', 'property']})
   const exampleBullMq = createQueueMQ('ExampleBullMQ');
 
   const serverAdapter = new ExpressAdapter();
   serverAdapter.setBasePath('/ui');
-  console.log('abc');
 
   createBullBoard({
     queues: [new BullMQAdapter(exampleBullMq)],
@@ -120,10 +119,6 @@ const run = async () => {
 
   app.use('/ui', ensureLoggedIn({ redirectTo: '/ui/login' }), serverAdapter.getRouter());
   
-  const consumer = await setupKafka({
-    groupId: process.env.CONSUMER_GROUP_ID || 'test-consumer',
-    topics: ['session', 'user', 'property']
-  });
   await consumer.run({
       eachBatch: async (eachBatchPayload) => {
         const { topic, partition, batch } = eachBatchPayload
