@@ -42,10 +42,6 @@ passport.deserializeUser((user, cb) => {
 
 const sleep = (t) => new Promise((resolve) => setTimeout(resolve, t * 1000));
 
-const REDIS_CONNECTION = {
-    ...redisOptions,
-    ...(process.env.REDIS_URL.startsWith('rediss://') ? { tls: {} } : null), // This trick makes sure SSL would work
-};
 const createQueueMQ = (name) => new QueueMQ(name, { connection: process.env.REDIS_URL });
 
 async function setupBullMQProcessor(queueName) {
