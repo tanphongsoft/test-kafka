@@ -42,10 +42,10 @@ passport.deserializeUser((user, cb) => {
 
 const sleep = (t) => new Promise((resolve) => setTimeout(resolve, t * 1000));
 
-const createQueueMQ = (name) => new QueueMQ(name, { connection: 'redis://red-canldmf6d9krj6eaih9g:6379' });
+const createQueueMQ = (name) => new QueueMQ(name, { connection: process.env.REDIS_URL });
 
 async function setupBullMQProcessor(queueName) {
-  const queueScheduler = new QueueScheduler(queueName, { connection: 'redis://red-canldmf6d9krj6eaih9g:6379' });
+  const queueScheduler = new QueueScheduler(queueName, { connection: process.env.REDIS_URL });
   await queueScheduler.waitUntilReady();
 
   new Worker(queueName, async (job) => {
@@ -112,7 +112,9 @@ const run = async () => {
       ok: true,
     });
   });
-
+  app.use('/healthcheck', (req, res) => {
+    res.json({ status: 'ok' })
+  })
   app.use('/ui', ensureLoggedIn({ redirectTo: '/ui/login' }), serverAdapter.getRouter());
   
   await consumer.run({
@@ -121,7 +123,7 @@ const run = async () => {
       for (const message of batch.messages) {
         const prefix = `${topic}[${partition} | ${message.offset}] / ${message.timestamp}`
         console.log(`- ${prefix} ${message.key}#${message.value}`) 
-        exampleBullMq.add(prefix, { message });
+        exampleBullMq.add(prefix, { message: message.value.toString() });
       }
     }
   })
