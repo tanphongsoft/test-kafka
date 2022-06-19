@@ -120,18 +120,16 @@ const run = async () => {
   app.use('/ui', ensureLoggedIn({ redirectTo: '/ui/login' }), serverAdapter.getRouter());
   
   await consumer.run({
-      eachBatch: async (eachBatchPayload) => {
-        const { topic, partition, batch } = eachBatchPayload
-        for (const message of batch.messages) {
-          const prefix = `${topic}[${partition} | ${message.offset}] / ${message.timestamp}`
-          console.log(`- ${prefix} ${message.key}#${message.value}`) 
-          exampleBullMq.add(prefix, { message });
-        }
+    eachBatch: async (eachBatchPayload) => {
+      const { topic, partition, batch } = eachBatchPayload
+      for (const message of batch.messages) {
+        const prefix = `${topic}[${partition} | ${message.offset}] / ${message.timestamp}`
+        console.log(`- ${prefix} ${message.key}#${message.value}`) 
+        exampleBullMq.add(prefix, { message });
       }
-    })
-  } catch (error) {
-    console.log('error', error);
-  }
+    }
+  })
+  
   app.listen(3002, () => {
     console.log('Running on 3000...');
     console.log('For the UI, open http://localhost:3000/ui');
