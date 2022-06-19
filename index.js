@@ -43,10 +43,10 @@ passport.deserializeUser((user, cb) => {
 
 const sleep = (t) => new Promise((resolve) => setTimeout(resolve, t * 1000));
 
-const createQueueMQ = (name) => new QueueMQ(name, { connection: renderRedis });
+const createQueueMQ = (name) => new QueueMQ(name, { connection: renderRedis }, renderRedis);
 
 async function setupBullMQProcessor(queueName) {
-  const queueScheduler = new QueueScheduler(queueName, { connection: renderRedis });
+  const queueScheduler = new QueueScheduler(queueName, { connection: renderRedis }, renderRedis);
   await queueScheduler.waitUntilReady();
 
   new Worker(queueName, async (job) => {
