@@ -9,6 +9,7 @@ const LocalStrategy = require('passport-local').Strategy;
 const { ensureLoggedIn } = require('connect-ensure-login');
 const express = require('express');
 const { setupKafka } = require('./setup-kafka');
+const { renderRedis } = require('./connection');
 // Configure the local strategy for use by Passport.
 //
 // The local strategy require a `verify` function which receives the credentials
@@ -42,10 +43,10 @@ passport.deserializeUser((user, cb) => {
 
 const sleep = (t) => new Promise((resolve) => setTimeout(resolve, t * 1000));
 
-const createQueueMQ = (name) => new QueueMQ(name, { connection: process.env.REDIS_URL });
+const createQueueMQ = (name) => new QueueMQ(name, { connection: renderRedis });
 
 async function setupBullMQProcessor(queueName) {
-  const queueScheduler = new QueueScheduler(queueName, { connection: process.env.REDIS_URL });
+  const queueScheduler = new QueueScheduler(queueName, { connection: renderRedis });
   await queueScheduler.waitUntilReady();
 
   new Worker(queueName, async (job) => {
