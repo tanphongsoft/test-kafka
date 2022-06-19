@@ -52,7 +52,7 @@ async function setupBullMQProcessor(queueName) {
   new Worker(queueName, async (job) => {
     for (let i = 0; i <= 100; i++) {
       await sleep(Math.random());
-      await job.updateProgress(i);
+      // await job.updateProgress(i);
       await job.log(`Processing job at interval ${i}`);
       console.log('job data', job.data);
 
@@ -124,7 +124,7 @@ const run = async () => {
       for (const message of batch.messages) {
         const prefix = `${topic}[${partition} | ${message.offset}] / ${message.timestamp}`
         console.log(`- ${prefix} ${message.key}#${message.value}`) 
-        exampleBullMq.add(prefix, { message: message.value.toString() });
+        exampleBullMq.add(prefix, { message: JSON.parse(message.value.toString()) });
       }
     }
   })
